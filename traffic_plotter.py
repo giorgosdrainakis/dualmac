@@ -11,7 +11,8 @@ import matplotlib
 from matplotlib.ticker import MaxNLocator
 from polydiavlika.myglobal import *
 
-filename='qos_med.csv'
+mytype='high'
+filename='qos_'+str(mytype)+'.csv'
 
 class Record():
     def __init__(self,packet_id,time,size,qos):
@@ -23,7 +24,7 @@ class Record():
 
 def get_timerange():
     ll=[]
-    ll=[x for x in range(0,3600*2,1)]
+    ll=[x/10000 for x in range(0,1000,1)]
     return ll
 
 file=TRAFFIC_DATASETS_FOLDER+filename
@@ -57,6 +58,6 @@ for x in timerange:
 plt.xlabel('Time (sec)', fontsize=20)
 plt.ylabel('Data generated (Bytes)', fontsize=20)
 plt.grid(True, which='major', axis='both')
-plt.title('Medium QoS')
+plt.title('QoS:' + str(mytype))
 plt.plot(X,Y)
 plt.show()
