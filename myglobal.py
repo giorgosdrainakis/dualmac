@@ -1,2 +1,9 @@
 ROOT='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\'
 TRAFFIC_DATASETS_FOLDER='traffic_datasets\\'
+PROPAGATION_TIME=12/(3e8)
+TOLERANCE = None
+N_collision = None
+T_send = None
+T_load = None
+T_idle = None
+timestep=None

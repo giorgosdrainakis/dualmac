@@ -1,3 +1,4 @@
-a=[1,3]
-a.pop(1)
-print(str(a))
+import random
+
+a=random.uniform(0, 0.1)
+print(a)

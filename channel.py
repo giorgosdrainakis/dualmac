@@ -19,6 +19,13 @@ class Channels():
                 frees.append(channel.id)
         return frees
 
+    def get_detected_free_channel_ids(self,current_time):
+        frees=[]
+        for channel in self.db:
+            if channel.detect_free(current_time):
+                frees.append(channel.id)
+        return frees
+
     def transmit(self,next_packet, channel_id):
         for channel in self.db:
             if channel.id==channel_id:
@@ -38,10 +45,18 @@ class Channel():
         self.id=id
         self.db=[]
         self.bitrate=bitrate
-        self.propagation_time=12/(3e8)
+        self.propagation_time=myglobal.PROPAGATION_TIME
+        self.detect_tx_in=0
+        self.detect_tx_out=0
 
     def is_free_open(self):
         if len(self.db)>0:
+            return False
+        else:
+            return True
+
+    def detect_free(self,current_time):
+        if self.detect_tx_in<=current_time and current_time<=self.detect_tx_out:
             return False
         else:
             return True
