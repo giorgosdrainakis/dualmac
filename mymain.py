@@ -1,6 +1,5 @@
 import datetime
 import math
-from scipy.stats import genpareto
 import matplotlib.pyplot as plt
 import numpy as numpy
 from polydiavlika.myglobal import *
@@ -22,7 +21,7 @@ from polydiavlika.channel import *
 
 
 
-TOTAL_NODES=8
+TOTAL_NODES=7
 T_BEGIN=0
 T_END=0.1
 duration=T_END-T_BEGIN
@@ -35,7 +34,7 @@ def main():
     first_time = True
     nodes=Nodes()
     channels=Channels()
-    print('start 0/1000=' + str(datetime.datetime.now()))
+
     # create nodes and channels
     for id in range(1,TOTAL_NODES+1):
         new_traffic=Traffic_per_packet('test'+str(id)+'.csv')
@@ -45,11 +44,12 @@ def main():
         new_node.buffer_high=Buffer(1600)
         nodes.add_new(new_node)
 
-    for id in range(1,2):
+    for id in range(1,3):
         new_channel=Channel(id,1e10)
         channels.add_new(new_channel)
     # run simulation
     CURRENT_TIME=T_BEGIN
+    print('start 0/1000=' + str(datetime.datetime.now()))
     while CURRENT_TIME<=T_END:
         # check if packets were born and add to buffers
         nodes.process_new_packets(CURRENT_TIME)
@@ -58,7 +58,7 @@ def main():
         for channel_id in free_channel_list:
             next_packet=nodes.get_next_packet(CURRENT_TIME)
             if next_packet is not None:
-                print('Transmitting packet=' + str(next_packet.packet_id) + 'from channel id=' + str(channel_id))
+                print('Transmitting packet=' + str(next_packet.packet_id) + ' from channel id=' + str(channel_id))
                 next_packet.time_buffer_out = CURRENT_TIME
                 next_packet.time_trx_in = CURRENT_TIME
                 channels.transmit(next_packet,channel_id)
@@ -78,9 +78,10 @@ def main():
     # print buffer etc. content
     for node in nodes.db:
         print(str(node.id))
-        print(str(node.receiver))
-        print(str(node.dropped))
+        print(len(node.receiver))
+        print(len(node.dropped))
         print('---------')
+    print('completeness 1000/1000=' + str(datetime.datetime.now()))
 
 
 main()

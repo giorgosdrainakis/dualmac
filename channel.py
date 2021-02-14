@@ -38,6 +38,7 @@ class Channel():
         self.id=id
         self.db=[]
         self.bitrate=bitrate
+        self.propagation_time=12/(3e8)
 
     def is_free_open(self):
         if len(self.db)>0:
@@ -58,7 +59,7 @@ class Channel():
         arrived=[]
         for packet in self.db:
             travel_time=(packet.packet_size*8)/self.bitrate
-            if packet.time_trx_in+travel_time<=CURRENT_TIME:
+            if packet.time_trx_in+travel_time+self.propagation_time<=CURRENT_TIME:
                 arrived.append(packet)
                 self.db.remove(packet)
         return arrived
