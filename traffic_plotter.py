@@ -11,11 +11,11 @@ import matplotlib
 from matplotlib.ticker import MaxNLocator
 from polydiavlika.myglobal import *
 trafficc='big'
-avgg=False
+avgg=True
 if trafficc=='big':
-    filename='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\zeroBIG.csv'
+    filename='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\slow_timeslot.csv'
 elif trafficc=='small':
-    filename = 'C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\lastSMALL.csv'
+    filename = 'C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\fast_1e9.csv'
 
 class My_Group:
     def __init__(self):
@@ -131,11 +131,6 @@ class Record():
         self.time_trx_out =float(time_trx_out)
         self.plot_time=0
 
-def get_timerange():
-    ll=[]
-    ll=[x*(4e-5) for x in range(0,2000,1)]
-    return ll
-
 def find_closest(element,list_of_things):
     diff=math.inf
     outvalue=None
@@ -159,11 +154,11 @@ with open(file) as csv_file:
                        row['time_trx_in'],row['time_trx_out'] )
         db.append(new_rec)
 
-tbegin_range=np.linspace(0, 0.08, 100)
+tbegin_range=np.linspace(0, 0.08, 200)
 list_of_new_dbs=[]
 total_load=0
 total_time=0.08
-timestep=0.08/100
+timestep=0.08/200
 for tbegin in tbegin_range:
     tend=tbegin+timestep
     new_db=[]
@@ -201,7 +196,10 @@ for new_db in list_of_new_dbs:
     DROP.append(drop)
     DELAY.append(delay)
 #Group stage
-rates=[0*1e7,0.25*1e7,0.5*1e7,0.75*1e7,1*1e7,1.25*1e7]
+rates=[0*1e5,0.5*1e5,1*1e5,1.5*1e5,2*1e5,2.5*1e5,3*1e5]
+rates=[0*1e6,0.5*1e6,1*1e6,1.5*1e6,2*1e6,2.5*1e6,3*1e6]
+#rates=[0*1e7,0.25*1e7,0.5*1e7,1*1e7,1.5*1e7,2*1e7,2.5*1e7]
+rates=[0*1e6,0.5*1e6,1*1e6,1.25e6,1.5e6,1.75e6]
 mygroup_list=[]
 for i in rates:
     mygroup=My_Group()
@@ -256,13 +254,13 @@ for gr in mygroup_list:
     prRO_DROP.append(gr.calc_ro_drop())
 
 if avgg:
-    plt.plot(prLOAD,prTHRU, label = "thru")
-    plt.plot(prLOAD, prDROP, label = "drop")
+    #plt.plot(prLOAD,prTHRU, label = "thru")
+    #plt.plot(prLOAD, prDROP, label = "drop")
     #plt.plot(prLOAD, prDELAY, label="delay")
     #plt.plot(prLOAD, prDROPPROP, label="drop probability")
     #plt.plot(prTHRU, prDELAY, label="delay")
-    #plt.plot(prRO, prRO_THRU, label="thruput")
-    #plt.plot(prRO, prRO_DROP, label = "drop")
+    plt.plot(prRO, prRO_THRU, label="thruput")
+    plt.plot(prRO, prRO_DROP, label = "drop")
     #plt.xlabel('Load (bytes per sec)', fontsize=25)
     #plt.xlabel('Thruput (bytes per sec)', fontsize=25)
     #plt.ylabel('Bytes per sec', fontsize=25)

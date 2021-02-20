@@ -7,4 +7,5 @@ N_collision = 16
 T_send = 1e-4
 T_load = 4e-5
 T_idle = (2.56e-8)+2*PROPAGATION_TIME
-timestep = 0.8e-9
+timestep = 1e-9 #timestep = 0.8e-9
+timeslot=51.2e-9

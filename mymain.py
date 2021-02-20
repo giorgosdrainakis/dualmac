@@ -67,7 +67,7 @@ def main():
         if first_time and CURRENT_TIME > log_interval:
             print('completeness 1/1000='+str(datetime.datetime.now()))
             first_time=False
-
+    print('FINISH!')
     # print buffer etc. content
     mytime = str(datetime.datetime.now())
     mytime = mytime.replace('-', '_')

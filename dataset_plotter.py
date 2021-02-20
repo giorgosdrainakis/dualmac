@@ -15,7 +15,8 @@ node_number=1
 filename='test'+str(node_number)+'.csv'
 t_begin=0
 t_end=0.008
-samples=1000
+samples=int((t_end-t_begin)/0.00004)
+print(str(samples))
 class Record():
     def __init__(self,packet_id,time,size,qos, source_id, destination_id):
         self.packet_id=int(packet_id)
@@ -52,7 +53,7 @@ Y=[]
 for x in timerange:
     y=0
     for rec in db:
-        if rec.plot_time==x and rec.qos=='high':
+        if rec.plot_time==x and rec.qos=='low':
             y=y+rec.size
     Y.append(y)
 #    Y.append(rec.size)

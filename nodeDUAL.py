@@ -258,7 +258,7 @@ class Node:
                     self.C_collision = self.C_collision + 1
                     #print(str(self.C_collision))
                     #self.backoff_time = max(int(random.uniform(0, (2 ** self.C_collision) - 1)),1) * myglobal.timestep
-                    self.backoff_time=max(random.randint(0, (2 ** self.C_collision) - 1),1)* myglobal.timestep
+                    self.backoff_time=max(random.randint(0, (2 ** self.C_collision) - 1),1)* myglobal.timeslot
                     self.current_packet.time_trx_out=-1
                     self.current_packet.time_trx_in = -1
                     print('Collision of packet =' + str(self.current_packet.packet_id) +' from node='+str(self.id) )
@@ -280,7 +280,7 @@ class Node:
                     self.C_collision = self.C_collision + 1
                     #print(str(self.C_collision))
                     #self.backoff_time = max(int(random.uniform(0, (2 ** self.C_collision) - 1)),1) * myglobal.timestep
-                    self.backoff_time=max(random.randint(0, (2 ** self.C_collision) - 1),1)* myglobal.timestep
+                    self.backoff_time=max(random.randint(0, (2 ** self.C_collision) - 1),1)* myglobal.timeslot
                     self.current_packet.time_trx_out=-1
                     self.current_packet.time_trx_in = -1
                     print('Collision of packet at arrival =' + str(self.current_packet.packet_id) +' from node='+str(self.id) )
@@ -298,7 +298,7 @@ class Node:
                     self.C_collision = self.C_collision + 1
                     #print(str(self.C_collision))
                     #self.backoff_time = max(int(random.uniform(0, (2 ** self.C_collision) - 1)),1) * myglobal.timestep
-                    self.backoff_time=max(random.randint(0, (2 ** self.C_collision) - 1),1)* myglobal.timestep
+                    self.backoff_time=max(random.randint(0, (2 ** self.C_collision) - 1),1)* myglobal.timeslot
                     self.current_packet.time_trx_out=-1
                     self.current_packet.time_trx_in = -1
                     self.current_channel_id = None
