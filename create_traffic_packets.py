@@ -1,3 +1,4 @@
+import csv
 import datetime
 import math
 import random
@@ -30,7 +31,7 @@ def get_interval_times_exponential(t_begin,t_end,packet_num):
 
 def get_interval_times_lognormal(t_begin,t_end,packet_num,sigma):
     mean_interval_time=(t_end-t_begin)/packet_num
-    interval_times_abs = numpy.random.lognormal(mean=math.log2(mean_interval_time), sigma=sigma, size=packet_num)
+    interval_times_abs = numpy.random.lognormal(mean=math.log(mean_interval_time,3), sigma=sigma, size=packet_num)
     interval_times_actual=[]
     new_sample_time=t_begin
     for abs_time in interval_times_abs:
@@ -206,12 +207,18 @@ def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,
     c_pareto = 0.8
     csv_content = ''
 
+    thru_low=avg_throughput*2
+    thru_med=avg_throughput*2.2
+    thru_high=avg_throughput*0.05
+    #thru_low=avg_throughput*0.55
+    #thru_med=avg_throughput*0.35
+    #thru_high=avg_throughput*0.05
     # For every source node
     dest_ids=nodeslist
 
     # Generate low qos traffic
     if qos=='all' or qos=='low':
-        low_packets,packet_id=generate_packets_low_qos(packet_id,t_begin,t_end,avg_throughput,nodeid,dest_ids,c_pareto,sigma_lognormal_low,alpha_weibull)
+        low_packets,packet_id=generate_packets_low_qos(packet_id,t_begin,t_end,thru_low,nodeid,dest_ids,c_pareto,sigma_lognormal_low,alpha_weibull)
         if low_packets is None:
             print('Warning: No low packets generated - check distribution params')
         else:
@@ -219,7 +226,7 @@ def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,
 
     # Generate medium qos traffic
     if qos=='all' or qos=='med':
-        med_packets,packet_id=generate_packets_med_qos(packet_id,t_begin,t_end,avg_throughput,nodeid,dest_ids,sigma_lognormal_med)
+        med_packets,packet_id=generate_packets_med_qos(packet_id,t_begin,t_end,thru_med,nodeid,dest_ids,sigma_lognormal_med)
         if med_packets is None:
             print('Warning: No med packets generated - check distribution params')
         else:
@@ -227,7 +234,7 @@ def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,
 
     # Generate high qos traffic
     if qos=='all' or qos=='high':
-        high_packets,packet_id=generate_packets_high_qos(packet_id,t_begin,t_end,avg_throughput,nodeid,dest_ids)
+        high_packets,packet_id=generate_packets_high_qos(packet_id,t_begin,t_end,thru_high,nodeid,dest_ids)
         if high_packets is None:
             print('Warning: No high packets generated - check distribution params')
         else:
@@ -245,22 +252,33 @@ def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,
     mytime = mytime.replace(':', '_')
     mytime = mytime.replace('.', '_')
 
-    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+ mytime + ".csv", mode='a') as file:
+    print('Writing...')
+    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+ 'test'+str(nodeid) + ".csv", mode='a') as file:
         file.write(output_table + '\n')
+    print('Sorting...')
+    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+  'test'+str(nodeid) + ".csv", 'r', newline='') as f_input:
+        csv_input = csv.DictReader(f_input)
+        data = sorted(csv_input, key=lambda row: (float(row['time']), float(row['packet_id'])))
+    print('Rewriting...')
+    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+  'test'+str(nodeid) + ".csv", 'w', newline='') as f_output:
+        csv_output = csv.DictWriter(f_output, fieldnames=csv_input.fieldnames)
+        csv_output.writeheader()
+        csv_output.writerows(data)
 
 t_begin=0 #sec (float)
-t_end=0.8 #sec (float)
-avg_throughput=1.25e9/3 #bytes! per sec (int) or 3.125
-node_id_list=[1] # (int)
+t_end=0.008 #sec (float)
+avg_throughput=5e9 #bytes! per sec (int) or 3.125
+node_id_list=[1, 2, 3, 4, 5, 6, 7, 8] # (int)
 maxnodeslist = [1, 2, 3, 4, 5, 6, 7, 8]
-avg_throughput=avg_throughput/len(maxnodeslist)
+avg_throughput_per_node=avg_throughput/len(maxnodeslist)
 qos='all'# {'low','med','high','all'} (string)
 
 # traffic dset is created by default in same dir as 'traffic_dataset.csv'
 for nodeid in node_id_list:
-    nodeslist=[item for item in maxnodeslist if item not in node_id_list]
+    temp=[nodeid]
+    nodeslist=[item for item in maxnodeslist if item not in temp]
     hasHeader=True
-    export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,qos,hasHeader)
+    export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput_per_node,qos,hasHeader)
 
 
 

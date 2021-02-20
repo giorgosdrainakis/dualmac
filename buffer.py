@@ -10,14 +10,21 @@ class Buffer():
         if len(self.db)>0:
             return True
 
+    def remove_packet(self,id):
+        for pack in self.db:
+            if pack.id==id:
+                self.db.remove(pack)
+                break
+
     def get_next_packet(self):
         mypacket=self.db[0]
         self.db.pop(0)
         return mypacket
 
-    def add(self,packet):
+    def add(self,packet,current_time):
         current_buffer_size=self.get_current_size()
         if current_buffer_size+packet.packet_size<=self.size:
+            packet.time_buffer_in=current_time
             self.db.append(packet)
             return True
         else:

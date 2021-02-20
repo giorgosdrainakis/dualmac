@@ -24,9 +24,9 @@ class Nodes:
                 return candidate
         return None
 
-    def process_new_packets(self,current_time):
+    def add_new_packets_to_buffers(self,current_time):
         for node in self.db:
-            node.process_new_packets(current_time)
+            node.add_new_packets_to_buffers(current_time)
 
     def process_buffers(self,current_time):
         for node in self.db:
@@ -42,7 +42,7 @@ class Node:
         self.receiver=[]
         self.dropped=[]
 
-    def process_new_packets(self,current_time):
+    def add_new_packets_to_buffers(self,current_time):
         new_packets=self.traffic.get_new_packets(current_time)
         for packet in new_packets:
             is_in_buffer=False

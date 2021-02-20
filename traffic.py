@@ -16,6 +16,18 @@ class Packet:
         self.time_trx_in=-1
         self.time_trx_out=-1
 
+    def show(self):
+        outp=str(self.packet_id)+','+\
+             str(self.time) + ','+\
+            str(self.packet_size) + ',' +\
+                str(self.packet_qos) + ',' +\
+                str(self.source_id) + ','+ \
+                str(self.destination_id) + ','+ \
+                str(self.time_buffer_in) + ',' + \
+             str(self.time_buffer_out) + ',' + \
+             str(self.time_trx_in) + ',' + \
+             str(self.time_trx_out)
+        return outp
 class Traffic_per_packet():
     def __init__(self,file):
         self.db=[]
@@ -39,9 +51,10 @@ class Traffic_per_packet():
     def get_new_packets(self,current_time):
         packet_list=[]
         for packet in self.db:
-            if math.isclose(current_time,packet.time,abs_tol=1e-10):
+            #if math.isclose(current_time,packet.time,abs_tol=myglobal.TOLERANCE): # legacy
+            if packet.time<=current_time:
                 packet_list.append(packet)
-                packet.time_buffer_in=current_time
+                #packet.time_buffer_in=current_time
                 self.db.remove(packet)
             else:
                 break
