@@ -15,6 +15,7 @@ class Packet:
         self.time_buffer_out=-1
         self.time_trx_in=-1
         self.time_trx_out=-1
+        self.mode=''
 
     def show(self):
         outp=str(self.packet_id)+','+\
@@ -26,7 +27,8 @@ class Packet:
                 str(self.time_buffer_in) + ',' + \
              str(self.time_buffer_out) + ',' + \
              str(self.time_trx_in) + ',' + \
-             str(self.time_trx_out)
+             str(self.time_trx_out) + ',' + \
+             str(self.mode)
         return outp
 class Traffic_per_packet():
     def __init__(self,file):

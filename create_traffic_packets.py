@@ -201,15 +201,15 @@ def export_traffic_dataset(nodes,t_begin,t_end,avg_throughput,qos,hasHeader):
 
 def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,qos,hasHeader):
     packet_id=0
-    sigma_lognormal_low = 1
-    sigma_lognormal_med = 1
+    sigma_lognormal_low = 5
+    sigma_lognormal_med = 2
     alpha_weibull = 0.1
-    c_pareto = 0.8
+    c_pareto = 0.5
     csv_content = ''
 
-    thru_low=avg_throughput*2
-    thru_med=avg_throughput*2.2
-    thru_high=avg_throughput*0.05
+    thru_low=avg_throughput*3 #2
+    thru_med=avg_throughput*2.5 #2
+    thru_high=avg_throughput*0.1 #0.05
     #thru_low=avg_throughput*0.55
     #thru_med=avg_throughput*0.35
     #thru_high=avg_throughput*0.05
@@ -267,7 +267,7 @@ def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,
 
 t_begin=0 #sec (float)
 t_end=0.008 #sec (float)
-avg_throughput=1e11 #bytes! per sec (int) or 3.125
+avg_throughput=1e10 #bytes! per sec (int) or 3.125
 node_id_list=[1, 2, 3, 4, 5, 6, 7, 8] # (int)
 maxnodeslist = [1, 2, 3, 4, 5, 6, 7, 8]
 avg_throughput_per_node=avg_throughput/len(maxnodeslist)
