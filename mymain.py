@@ -1,20 +1,5 @@
 import datetime
 import pandas as pd
-import math
-import matplotlib.pyplot as plt
-import numpy as numpy
-from polydiavlika.myglobal import *
-import csv
-import math
-from scipy.stats import genpareto
-import matplotlib.pyplot as plt
-import numpy as numpy
-import random
-import numpy as np
-import statistics
-import csv
-import matplotlib
-from matplotlib.ticker import MaxNLocator
 from polydiavlika.node import *
 from polydiavlika.traffic import *
 from polydiavlika.buffer import *
@@ -24,19 +9,13 @@ def main():
     # params
     MODE='DUAL' # or WAA
     if MODE=='DUAL':
-        BITRATE = 5e9
+        BITRATE = 10e9
         channel_id_list = [1]  # one data channel
     else:
-        BITRATE=10e9
+        BITRATE=5e9
         channel_id_list = [2] # 2 data channel
         control_channel_id = 5000 # 1 control channel
-    T_BEGIN = 0
-    T_END = 0.008
-    # constants
-    TOTAL_NODES =  8
-    HIGH_BUFFER_SIZE = 1e6
-    MED_BUFFER_SIZE = 1e6
-    LOW_BUFFER_SIZE = 1e6
+
     duration = T_END - T_BEGIN
     log_interval = duration / 1000 # for debugging
 
@@ -46,7 +25,7 @@ def main():
 
     # create nodes and channels
     for id in range(1,TOTAL_NODES+1):
-        new_traffic=Traffic_per_packet('test'+str(id)+'.csv')
+        new_traffic=Traffic_per_packet(traffic_dataset_folder+'test'+str(id)+'.csv')
         new_node=Node(id,new_traffic)
         new_node.buffer_low=Buffer(LOW_BUFFER_SIZE)
         new_node.buffer_med=Buffer(MED_BUFFER_SIZE)
@@ -95,7 +74,7 @@ def main():
         print('id='+str(node.id))
         print('rx='+str(len(node.received)))
         print('ovflow='+str(len(node.dropped)))
-        print('desotryed='+str(len(node.destroyed)))
+        print('destroyed='+str(len(node.destroyed)))
         print('---------')
         for packet in node.received:
             output_table=output_table+packet.show()+'\n'
@@ -105,13 +84,13 @@ def main():
             output_table=output_table+packet.show()+'\n'
 
         print('Writing node +...'+str(node.id))
-        nodename=myglobal.ROOT + 'log'+ mytime +  str(node.id) +".csv"
+        nodename=myglobal.ROOT+'logs//' + 'log'+ mytime +'_for_node_'+  str(node.id) +".csv"
         with open(nodename, mode='a') as file:
             file.write(output_table)
             filenames.append(nodename)
 
     combined_csv = pd.concat([pd.read_csv(f) for f in filenames])
-    combined_name=myglobal.ROOT+'combined'+str(mytime)+'.csv'
+    combined_name=myglobal.ROOT+'logs//'+'combined'+str(mytime)+'.csv'
     combined_csv.to_csv(combined_name, index=False)
 
     print('Sorting...')
@@ -126,4 +105,14 @@ def main():
         csv_output.writerows(data)
 
     print('completeness 1000/1000=' + str(datetime.datetime.now()))
-main()
+
+
+### params and run
+T_BEGIN = 0
+T_END = 0.1
+TOTAL_NODES =  8
+HIGH_BUFFER_SIZE = 1e6 # bytes
+MED_BUFFER_SIZE = 1e6 # bytes
+LOW_BUFFER_SIZE = 1e6 # bytes
+traffic_dataset_folder='2021_03_02_18_03_02_702107//'
+main() # will create N logfiles for N nodes and a combined csv with all packets in root/logs

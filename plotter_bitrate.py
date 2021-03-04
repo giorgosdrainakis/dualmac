@@ -10,12 +10,22 @@ import csv
 import matplotlib
 from matplotlib.ticker import MaxNLocator
 from polydiavlika.myglobal import *
-trafficc='big'
+
+# First run with avgg=False to check all samples (where they span)
+# According to this plot-> set avgg=True and set grouping parameters to get finalized plots
+# Plot label params at the end of the script (thruput-delay-overflow)
+
+# Sampling params
 avgg=True
-if trafficc=='big':
-    filename='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\last_noprop_wait.csv'
-elif trafficc=='small':
-    filename = 'C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\fast_1e9.csv'
+filename='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\logs\\combined2021_03_03_20_11_00_120353.csv'
+my_tbegin=0
+my_tend=0.1
+samples=500
+# Grouping params
+start_sampling_value=0
+end_sampling_value=6e5
+grouping_points=20
+rates=np.linspace(start_sampling_value,end_sampling_value,grouping_points)
 
 class My_Group:
     def __init__(self,timestep):
@@ -87,6 +97,19 @@ class My_Group:
         else:
             return 0
 
+    def calc_avgload_bit(self):
+        total=0
+        N=0
+        for i in self.load:
+            total=total+i*8
+            N=N+1
+        if N>0:
+            avg = total / N
+            ret = avg / self.timestep
+            return ret
+        else:
+            return 0
+
     def calc_dropprop(self):
         total=0
         N=0
@@ -119,6 +142,19 @@ class My_Group:
         else:
             return 0
 
+    def calc_thru_bit(self):
+        total=0
+        N=0
+        for i in self.thru:
+            total=total+i*8
+            N=N+1
+        if N>0:
+            avg = total / N
+            ret = avg / self.timestep
+            return ret
+        else:
+            return 0
+
     def calc_drop(self):
         total=0
         N=0
@@ -127,6 +163,19 @@ class My_Group:
             N=N+1
         if N>0:
             return total/N
+        else:
+            return 0
+
+    def calc_drop_bit(self):
+        total=0
+        N=0
+        for i in self.drop:
+            total=total+i*8
+            N=N+1
+        if N>0:
+            avg = total / N
+            ret = avg / self.timestep
+            return ret
         else:
             return 0
 class Record():
@@ -179,9 +228,6 @@ with open(filename) as csv_file:
                        row['time_trx_in'],row['time_trx_out'],row['mode'] )
         db.append(new_rec)
 
-my_tbegin=0
-my_tend=0.008
-samples=100
 tbegin_range=np.linspace(my_tbegin, my_tend, samples)
 list_of_new_dbs=[]
 total_load=0
@@ -214,23 +260,18 @@ LOAD=[]
 THRU=[]
 DROP=[]
 DELAY=[]
+THRU_BIT=[]
+LOAD_BIT=[]
 
 for timeslot in timeslot_list:
     LOAD.append(timeslot.load)
     THRU.append(timeslot.thru)
     DROP.append(timeslot.drop)
     DELAY.append(timeslot.delay/timeslot.delayed)
+    THRU_BIT.append(timeslot.thru*8)
+    LOAD_BIT.append(timeslot.load*8)
 
 #Group stage
-rates=[0.5e5,1e5,1.5e5,2*1e5,2.5e5,3*1e5,3.5e5]
-rates=[0.25e5,0.5e5,1e5,1.25*1e5,1.5e5,1.74*1e5]
-rates=[0,0.5e4,1e4,1.5e5,2e5,2.5e5,3e5,3.5e5]
-#rates=[0*1e5,1*1e5,2*1e5,3*1e5,4*1e5,5*1e5,6*1e5]
-#rates=[0*1e6,0.5*1e6,1*1e6,1.5*1e6,2*1e6]
-#rates=[0*1e7,0.25*1e7,0.5*1e7,1*1e7,1.5*1e7,2*1e7,2.5*1e7]
-#rates=[0*1e6,0.5*1e6,1*1e6,1.5*1e6,2*1e6,2.5*1e6,3e6,3.5e6,4e6]
-#rates=[0*1e6,0.5*1e6,1*1e6,1.5*1e6,2*1e6]
-
 mygroup_list=[]
 for i in rates:
     mygroup=My_Group(timestep)
@@ -262,6 +303,9 @@ prDROPPROP=[]
 prRO=[]
 prRO_THRU=[]
 prRO_DROP=[]
+prLOAD_BIT=[]
+prTHRU_BIT=[]
+prDROP_BIT=[]
 for gr in mygroup_list:
     prLOAD.append(gr.calc_avgload())
     prTHRU.append(gr.calc_thru())
@@ -271,31 +315,41 @@ for gr in mygroup_list:
     prRO.append(gr.calc_ro())
     prRO_THRU.append(gr.calc_ro_thru())
     prRO_DROP.append(gr.calc_ro_drop())
+    prLOAD_BIT.append(gr.calc_avgload_bit())
+    prTHRU_BIT.append(gr.calc_thru_bit())
+    prDROP_BIT.append(gr.calc_drop_bit())
 
 if avgg:
     #plt.plot(prLOAD,prTHRU, label = "thru")
     #plt.plot(prLOAD, prDROP, label = "drop")
     #plt.plot(prRO, prDELAY, label="delay")
-    plt.plot(prRO, prDROPPROP, label="drop probability")
+    #plt.plot(prRO, prDROPPROP, label="drop probability")
     #plt.plot(prTHRU, prDELAY, label="delay")
     #plt.plot(prRO, prRO_THRU,label="thruput")
     #plt.plot(prRO, prRO_DROP, label = "drop")
-    #plt.xlabel('Load (bytes per sec)', fontsize=25)
+    #plt.plot(prLOAD_BIT, prTHRU_BIT, label="thruput bitrate")
+    #plt.plot(prLOAD_BIT,prDROP_BIT,  label="drop bitrate")
+    #plt.plot(prLOAD_BIT,prDELAY, label="delay")
+    #plt.plot(prTHRU_BIT,prDELAY,  label="delay")
+    plt.plot(prLOAD_BIT,prDROPPROP,  label="drop_prob")
+    ############### LABELS #####################
+    plt.xlabel('Load (bps)', fontsize=25)
     #plt.xlabel('Thruput (bytes per sec)', fontsize=25)
-    #plt.ylabel('Bytes per sec', fontsize=25)
+    plt.ylabel('Probability', fontsize=25)
     #plt.ylabel('Sec', fontsize=25)
     #plt.ylabel('Probability', fontsize=25)
     plt.grid(True, which='major', axis='both')
-    plt.title('Propagation delay=0, Waiting delay>0', fontsize=25)
+    plt.title('Waiting time', fontsize=25)
     plt.legend()
     plt.show()
 else:
     plt.plot(LOAD,THRU,'o', label = "thru")
     plt.plot(LOAD, DROP,'o', label = "drop")
     #plt.plot(LOAD, DELAY, 'o', label="delay")
+    #plt.plot(LOAD_BIT,THRU_BIT,'o', label = "thru")
     plt.xlabel('Load (bytes per sec)', fontsize=25)
-    plt.ylabel('Bytes per sec', fontsize=25)
+    plt.ylabel('Bits per sec', fontsize=25)
     plt.grid(True, which='major', axis='both')
-    plt.title('Propagation delay>0, Waiting delay=0', fontsize=25)
+    plt.title('Here is the title', fontsize=25)
     plt.legend()
     plt.show()

@@ -4,9 +4,9 @@ import math
 import random
 from polydiavlika import myglobal
 from scipy.stats import genpareto
-import matplotlib.pyplot as plt
 import numpy as numpy
 from scipy.stats import weibull_min
+from pathlib import Path
 
 def get_variable_packet_size(small_size,big_size,small_prob):
     myrand=random.random()
@@ -15,7 +15,6 @@ def get_variable_packet_size(small_size,big_size,small_prob):
     else:
         ret=big_size
     return ret
-
 def get_interval_times_exponential(t_begin,t_end,packet_num):
     mean_interval_time=(t_end-t_begin)/packet_num
     interval_times_abs = numpy.random.exponential(scale=mean_interval_time, size=packet_num)
@@ -28,7 +27,6 @@ def get_interval_times_exponential(t_begin,t_end,packet_num):
         else:
             interval_times_actual.append(new_sample_time)
     return interval_times_actual
-
 def get_interval_times_lognormal(t_begin,t_end,packet_num,sigma):
     mean_interval_time=(t_end-t_begin)/packet_num
     interval_times_abs = numpy.random.lognormal(mean=math.log(mean_interval_time,3), sigma=sigma, size=packet_num)
@@ -41,7 +39,6 @@ def get_interval_times_lognormal(t_begin,t_end,packet_num,sigma):
         else:
             interval_times_actual.append(new_sample_time)
     return interval_times_actual
-
 def get_interval_times_weibull(t_begin,t_end,packet_num,alpha):
     mean_interval_time=(t_end-t_begin)/packet_num
     #interval_times_abs = mean_interval_time*numpy.random.weibull(a=alpha,size=packet_num)
@@ -55,7 +52,6 @@ def get_interval_times_weibull(t_begin,t_end,packet_num,alpha):
         else:
             interval_times_actual.append(new_sample_time)
     return interval_times_actual
-
 def get_on_off_times(t_begin,t_end,packet_num,c_pareto,sigma):
     mean_interval_time=(t_end-t_begin)/packet_num
     #on_times_abs=gprnd(c_pareto,mean_interval_time,0,1,packet_num) todo
@@ -77,7 +73,6 @@ def get_on_off_times(t_begin,t_end,packet_num,c_pareto,sigma):
             on_periods.append([new_on_start,new_off_start])
         counter=counter+1
     return on_periods
-
 def generate_packets_low_qos(packet_id,t_begin,t_end,avg_throughput,source_id,destination_ids,c_pareto,sigma_lognormal,alpha):
     csv_reader=''
     first_packet_id=packet_id
@@ -98,9 +93,8 @@ def generate_packets_low_qos(packet_id,t_begin,t_end,avg_throughput,source_id,de
             csv_reader=csv_reader+str(packet_id)+','+str(new_time)+','\
                        +str(packet_size)+','+str(qos)+','+str(source_id)+','+str(destination_id)+'\n'
             packet_id = packet_id + 1
-            print('low='+str((packet_id-first_packet_id)/total_len))
+            print('node '+str(source_id)+',low progress %='+str((packet_id-first_packet_id)*100/total_len))
     return csv_reader,packet_id
-
 def generate_packets_med_qos(packet_id,t_begin,t_end,avg_throughput,source_id,destination_ids,sigma_lognormal):
     csv_reader=''
     first_packet_id=packet_id
@@ -117,9 +111,8 @@ def generate_packets_med_qos(packet_id,t_begin,t_end,avg_throughput,source_id,de
         csv_reader = csv_reader + str(packet_id) + ',' + str(new_time) + ',' \
                      + str(packet_size) + ',' + str(qos) + ',' + str(source_id) + ',' + str(destination_id) + '\n'
         packet_id = packet_id + 1
-        print('med='+str((packet_id-first_packet_id)/total_len))
+        print('node ' + str(source_id) + ',med progress %=' + str((packet_id - first_packet_id) * 100 / total_len))
     return csv_reader,packet_id
-
 def generate_packets_high_qos(packet_id,t_begin,t_end,avg_throughput,source_id,destination_ids):
     csv_reader=''
     packet_id=packet_id
@@ -137,9 +130,8 @@ def generate_packets_high_qos(packet_id,t_begin,t_end,avg_throughput,source_id,d
         csv_reader = csv_reader + str(packet_id) + ',' + str(new_time) + ',' \
                      + str(packet_size) + ',' + str(qos) + ',' + str(source_id) + ',' + str(destination_id) + '\n'
         packet_id=packet_id+1
-        print('high='+str((packet_id-first_packet_id)/total_len))
+        print('node ' + str(source_id) + ',high progress %=' + str((packet_id - first_packet_id) * 100 / total_len))
     return csv_reader,packet_id
-
 def export_traffic_dataset(nodes,t_begin,t_end,avg_throughput,qos,hasHeader):
     sigma_lognormal_low = 2.6
     sigma_lognormal_med = 1
@@ -198,21 +190,16 @@ def export_traffic_dataset(nodes,t_begin,t_end,avg_throughput,qos,hasHeader):
 
     with open(Global._ROOT + Global._LOGS_FOLDER + 'traffic_dataset_packets_'+mytime + ".txt", mode='a') as file:
         file.write(output_table + '\n')
-
-def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,qos,hasHeader):
+def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,qos,hasHeader,low_thru_param,med_thru_param,high_thru_param):
     packet_id=0
     sigma_lognormal_low = 5
     sigma_lognormal_med = 2
     alpha_weibull = 0.1
     c_pareto = 0.5
     csv_content = ''
-
-    thru_low=avg_throughput*3 #2
-    thru_med=avg_throughput*2.5 #2
-    thru_high=avg_throughput*0.1 #0.05
-    #thru_low=avg_throughput*0.55
-    #thru_med=avg_throughput*0.35
-    #thru_high=avg_throughput*0.05
+    thru_low=avg_throughput*low_thru_param #3
+    thru_med=avg_throughput*med_thru_param #2.5
+    thru_high=avg_throughput*high_thru_param #0.1
     # For every source node
     dest_ids=nodeslist
 
@@ -253,32 +240,47 @@ def export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput,
     mytime = mytime.replace('.', '_')
 
     print('Writing...')
-    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+ 'test'+str(nodeid) + ".csv", mode='a') as file:
+    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+mynewfolder+ 'test'+str(nodeid) + ".csv", mode='a') as file:
         file.write(output_table + '\n')
     print('Sorting...')
-    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+  'test'+str(nodeid) + ".csv", 'r', newline='') as f_input:
+    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+mynewfolder+  'test'+str(nodeid) + ".csv", 'r', newline='') as f_input:
         csv_input = csv.DictReader(f_input)
         data = sorted(csv_input, key=lambda row: (float(row['time']), float(row['packet_id'])))
     print('Rewriting...')
-    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+  'test'+str(nodeid) + ".csv", 'w', newline='') as f_output:
+    with open(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+mynewfolder+  'test'+str(nodeid) + ".csv", 'w', newline='') as f_output:
         csv_output = csv.DictWriter(f_output, fieldnames=csv_input.fieldnames)
         csv_output.writeheader()
         csv_output.writerows(data)
+def get_timestamp_to_string():
+    mytime = str(datetime.datetime.now())
+    mytime = mytime.replace('-', '_')
+    mytime = mytime.replace(' ', '_')
+    mytime = mytime.replace(':', '_')
+    mytime = mytime.replace('.', '_')
+    return mytime
+def run_with_params(): # main
+    for nodeid in node_id_list:
+        temp=[nodeid]
+        nodeslist=[item for item in maxnodeslist if item not in temp]
+        hasHeader=True
+        export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput_per_node,qos,hasHeader,low_thru_shape_param,med_thru_shape_param,high_thru_shape_param)
 
+#############  params  ###############
 t_begin=0 #sec (float)
-t_end=0.008 #sec (float)
-avg_throughput=1e10 #bytes! per sec (int) or 3.125
-node_id_list=[1, 2, 3, 4, 5, 6, 7, 8] # (int)
-maxnodeslist = [1, 2, 3, 4, 5, 6, 7, 8]
+t_end=0.1 #sec (float)
+avg_throughput=1e10 # mean bytes per sec being generated
+node_id_list=[1, 2, 3, 4, 5, 6, 7, 8] #source nodes
+qos='all'# choose qos packets allowed {'low','med','high','all'}
+
+############ constants ###############
+maxnodeslist = [1, 2, 3, 4, 5, 6, 7, 8] #destination nodes
+low_thru_shape_param=3 # (float)
+med_thru_shape_param=2.5 # (float)
+high_thru_shape_param=0.1 # (float)
 avg_throughput_per_node=avg_throughput/len(maxnodeslist)
-qos='all'# {'low','med','high','all'} (string)
 
-# traffic dset is created by default in same dir as 'traffic_dataset.csv'
-for nodeid in node_id_list:
-    temp=[nodeid]
-    nodeslist=[item for item in maxnodeslist if item not in temp]
-    hasHeader=True
-    export_traffic_dataset_single(nodeid,nodeslist,t_begin,t_end,avg_throughput_per_node,qos,hasHeader)
-
-
-
+# MAIN - traffic dset is created by default in
+# traffic_dataset/<CURRENT_TIMESTAMP> as 'testN.csv', for N=1,2...
+mynewfolder=get_timestamp_to_string()+'\\'
+Path(myglobal.ROOT + myglobal.TRAFFIC_DATASETS_FOLDER+mynewfolder).mkdir(parents=True, exist_ok=True)
+run_with_params()

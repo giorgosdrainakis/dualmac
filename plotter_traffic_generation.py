@@ -12,11 +12,9 @@ from matplotlib.ticker import MaxNLocator
 from polydiavlika.myglobal import *
 
 node_number=1
-#filename='test'+str(node_number)+'.csv'
 filename='test1.csv'
 t_begin=0
 t_end=0.008
-samples=int((t_end-t_begin)/0.00004)
 samples=200
 class Record():
     def __init__(self,packet_id,time,size,qos, source_id, destination_id):
