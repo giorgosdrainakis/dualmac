@@ -1,7 +1,7 @@
 import math
 import random
-from polydiavlika import myglobal
-from polydiavlika.channel import *
+from dualmac import myglobal
+from dualmac.channel import *
 
 class Nodes:
     def __init__(self):

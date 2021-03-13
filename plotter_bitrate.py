@@ -9,7 +9,7 @@ import statistics
 import csv
 import matplotlib
 from matplotlib.ticker import MaxNLocator
-from polydiavlika.myglobal import *
+from dualmac.myglobal import *
 
 # First run with avgg=False to check all samples (where they span)
 # According to this plot-> set avgg=True and set grouping parameters to get finalized plots
@@ -17,7 +17,7 @@ from polydiavlika.myglobal import *
 
 # Sampling params
 avgg=True
-filename='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\logs\\CD_0_1.csv'
+filename= '/dualmac\\logs\\CD_0_1.csv'
 my_tbegin=0
 my_tend=0.1
 samples=500

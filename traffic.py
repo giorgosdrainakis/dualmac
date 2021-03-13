@@ -1,7 +1,7 @@
 import csv
 import math
 
-from polydiavlika import myglobal
+from dualmac import myglobal
 
 class Packet:
     def __init__(self,packet_id,time,packet_size,packet_qos,source_id,destination_id):

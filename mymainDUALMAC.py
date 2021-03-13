@@ -1,9 +1,9 @@
 import datetime
 import pandas as pd
-from polydiavlika.node import *
-from polydiavlika.traffic import *
-from polydiavlika.buffer import *
-from polydiavlika.channel import *
+from dualmac.node import *
+from dualmac.traffic import *
+from dualmac.buffer import *
+from dualmac.channel import *
 
 def main():
     if MODE=='DUAL':

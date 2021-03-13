@@ -9,7 +9,7 @@ import statistics
 import csv
 import matplotlib
 from matplotlib.ticker import MaxNLocator
-from polydiavlika.myglobal import *
+from dualmac.myglobal import *
 
 node_number=1
 filename='test1.csv'

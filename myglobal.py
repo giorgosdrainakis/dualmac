@@ -1,4 +1,4 @@
-ROOT='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\'
+ROOT='C:\\Pycharm\\Projects\\polydiavlika\\dualmac\\'
 TRAFFIC_DATASETS_FOLDER='traffic_datasets\\'
 PROPAGATION_TIME=0 #PROPAGATION_TIME=0 10/(2e8)
 WAA_capacity_64=46
