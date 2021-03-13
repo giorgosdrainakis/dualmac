@@ -6,8 +6,6 @@ from polydiavlika.buffer import *
 from polydiavlika.channel import *
 
 def main():
-    # params
-    MODE='DUAL' # or WAA
     if MODE=='DUAL':
         BITRATE = 10e9
         channel_id_list = [1]  # one data channel
@@ -49,8 +47,12 @@ def main():
     while CURRENT_TIME<=T_END or nodes.have_buffers_packets():
         nodes.add_new_packets_to_buffers(CURRENT_TIME)
         if MODE == 'DUAL':  # collision avoidance CA
-            nodes.check_transmission_CA(CURRENT_TIME)
-            nodes.transmit_CA(CURRENT_TIME)
+            if CA:
+                nodes.check_transmission_CA(CURRENT_TIME)
+                nodes.transmit_CA(CURRENT_TIME)
+            else:
+                nodes.check_transmission_CD(CURRENT_TIME)
+                nodes.transmit_CD(CURRENT_TIME)
         else: # new protocol
             nodes.check_transmission_WAA(CURRENT_TIME)
             nodes.transmit_WAA(CURRENT_TIME)
@@ -108,11 +110,13 @@ def main():
 
 
 ### params and run
+MODE='DUAL' # or WAA
+CA=False #collision avoidance=True or detection=False
 T_BEGIN = 0
-T_END = 0.1
+T_END = 1
 TOTAL_NODES =  8
 HIGH_BUFFER_SIZE = 1e6 # bytes
 MED_BUFFER_SIZE = 1e6 # bytes
 LOW_BUFFER_SIZE = 1e6 # bytes
-traffic_dataset_folder='2021_03_02_18_03_02_702107//'
+traffic_dataset_folder='2021_03_09_14_30_35_864499//'
 main() # will create N logfiles for N nodes and a combined csv with all packets in root/logs

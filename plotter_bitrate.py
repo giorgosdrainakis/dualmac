@@ -17,14 +17,14 @@ from polydiavlika.myglobal import *
 
 # Sampling params
 avgg=True
-filename='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\logs\\combined2021_03_03_20_11_00_120353.csv'
+filename='C:\\Pycharm\\Projects\\polydiavlika\\polydiavlika\\logs\\CD_0_1.csv'
 my_tbegin=0
 my_tend=0.1
 samples=500
 # Grouping params
 start_sampling_value=0
-end_sampling_value=6e5
-grouping_points=20
+end_sampling_value=8e5
+grouping_points=18
 rates=np.linspace(start_sampling_value,end_sampling_value,grouping_points)
 
 class My_Group:
@@ -318,6 +318,42 @@ for gr in mygroup_list:
     prLOAD_BIT.append(gr.calc_avgload_bit())
     prTHRU_BIT.append(gr.calc_thru_bit())
     prDROP_BIT.append(gr.calc_drop_bit())
+print(str(prLOAD_BIT))
+print(str(prTHRU_BIT))
+print(str(prDROP_BIT))
+
+idx=0
+while idx<len(prDROP_BIT):
+    if prLOAD_BIT[idx]!=0 and prTHRU_BIT[idx]==0:
+        del prLOAD_BIT[idx]
+        del prTHRU_BIT[idx]
+        del prDROP_BIT[idx]
+    idx=idx+1
+
+idx=0
+while idx<len(prDROP_BIT):
+    if prLOAD_BIT[idx]==0 and prTHRU_BIT[idx]!=0:
+        del prLOAD_BIT[idx]
+        del prTHRU_BIT[idx]
+        del prDROP_BIT[idx]
+    idx=idx+1
+
+idx=0
+print(len(prDROP_BIT))
+while idx<len(prDROP_BIT):
+    if prLOAD_BIT[idx]==0 and idx>0:
+        del prLOAD_BIT[idx]
+        del prTHRU_BIT[idx]
+        del prDROP_BIT[idx]
+    idx=idx+1
+
+del prLOAD_BIT[-1]
+del prTHRU_BIT[-1]
+del prDROP_BIT[-1]
+
+print(str(prLOAD_BIT))
+print(str(prTHRU_BIT))
+print(str(prDROP_BIT))
 
 if avgg:
     #plt.plot(prLOAD,prTHRU, label = "thru")
@@ -327,11 +363,11 @@ if avgg:
     #plt.plot(prTHRU, prDELAY, label="delay")
     #plt.plot(prRO, prRO_THRU,label="thruput")
     #plt.plot(prRO, prRO_DROP, label = "drop")
-    #plt.plot(prLOAD_BIT, prTHRU_BIT, label="thruput bitrate")
-    #plt.plot(prLOAD_BIT,prDROP_BIT,  label="drop bitrate")
+    plt.plot(prLOAD_BIT, prTHRU_BIT, label="thruput bitrate")
+    plt.plot(prLOAD_BIT,prDROP_BIT,  label="drop bitrate")
     #plt.plot(prLOAD_BIT,prDELAY, label="delay")
     #plt.plot(prTHRU_BIT,prDELAY,  label="delay")
-    plt.plot(prLOAD_BIT,prDROPPROP,  label="drop_prob")
+    #plt.plot(prLOAD_BIT,prDROPPROP,  label="drop_prob")
     ############### LABELS #####################
     plt.xlabel('Load (bps)', fontsize=25)
     #plt.xlabel('Thruput (bytes per sec)', fontsize=25)
@@ -339,7 +375,7 @@ if avgg:
     #plt.ylabel('Sec', fontsize=25)
     #plt.ylabel('Probability', fontsize=25)
     plt.grid(True, which='major', axis='both')
-    plt.title('Waiting time', fontsize=25)
+    plt.title('Both Waiting and Prop Delay', fontsize=25)
     plt.legend()
     plt.show()
 else:

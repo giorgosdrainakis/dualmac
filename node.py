@@ -16,42 +16,8 @@ class Nodes:
         for node in self.db:
             node.add_new_packets_to_buffers(current_time)
 
-    def transmit(self, current_time):
-        self.decrement()
-        #detected_free_channel_ids = self.channels.get_detected_free_channel_ids(current_time)
-        detected_free_channels = self.channels.get_detected_free_channels(current_time)
-        actual_free_channels=self.channels.get_free_channels(current_time) # todo works for 1 channel
-        #print('Detected='+str(len(detected_free_channels)))
-        #print('Free=' + str(len(actual_free_channels)))
-        if self.mode == 'competition':
-            for node in self.db:
-                aa=node.transmit(current_time, detected_free_channels)
-                #print(str(aa) + ',' + str(node.id))
-            #print('----')
-        elif self.mode == 'polling':
-            for node in self.db:
-                if node.flag_B == 'send':
-                    aa=node.transmit(current_time, actual_free_channels)
-                    #print((str(node.C_load) + ',' + str(node.C_idle) + ',' + str(node.C_send) + ','+str(aa)+ ','+str(node.id)))
-                    if node.current_packet is None or node.C_send==0:
-                        node.flag_B = 'stop'
-                    else:
-                        node.C_idle = myglobal.T_idle
-            #print('----')
-            for node in self.db:
-                if node.C_load == 0 or node.C_idle == 0:
-                    self.switch_to_competition(node.id)
-                    break
-        else:
-            print('Error - cannot find rack mode')
-
-        for channel in self.channels.db:
-            for node in self.db:
-                if node.current_channel_id==channel.id:
-                    channel.detect_tx_in=min(channel.detect_tx_in,node.current_packet.time_trx_in+channel.propagation_time)
-                    channel.detect_tx_out=max(channel.detect_tx_out,node.current_packet.time_trx_out+channel.propagation_time)
-                    channel.tx_in = min(channel.tx_in,node.current_packet.time_trx_in)
-                    channel.tx_out = max(channel.tx_out,node.current_packet.time_trx_out)
+    def transmit_CD(self,current_time):
+        self.transmit_CA(current_time)
 
     def transmit_CA(self, current_time):
         self.decrement()
@@ -144,23 +110,50 @@ class Nodes:
         else:
             print('Error - cannot find rack mode in protocol check')
 
-
-    def check_transmission(self,current_time):
+    def check_transmission_CD(self,current_time):
         # check conflicts due to instanteous transmission
+        last_collided_channel_ids=[]
         for node in self.db:
             for other_node in self.db:
-                if other_node.id!=node.id and other_node.current_channel_id==node.current_channel_id:
-                    if not node.current_packet_does_collide:
-                        node.current_packet_does_collide=True
+                if other_node.id!=node.id and \
+                        node.current_channel_id is not None and \
+                        other_node.current_channel_id is not None and \
+                        other_node.current_channel_id==node.current_channel_id :
+                            last_collided_channel_ids.append(node.current_channel_id)
+                            node.current_packet_does_collide=True
+        last_collided_channel_ids=set(last_collided_channel_ids)
         # check arrivals
         for node in self.db:
-            node.check_arrival(current_time)
+            node.check_arrival_CD(current_time)
+
+        for channel in self.channels.db:
+            found=False
+            for node in self.db:
+                if node.current_channel_id==channel.id:
+                    found=True
+                    channel.detect_tx_in=min(channel.detect_tx_in,node.current_packet.time_trx_in+channel.propagation_time)
+                    channel.detect_tx_out=max(channel.detect_tx_out,node.current_packet.time_trx_out+channel.propagation_time)
+                    channel.tx_in = min(channel.tx_in,node.current_packet.time_trx_in)
+                    channel.tx_out = max(channel.tx_out,node.current_packet.time_trx_out)
+            if not found and channel.id in last_collided_channel_ids:
+                channel.detect_tx_in = -1
+                channel.detect_tx_out = current_time + channel.propagation_time
+                channel.tx_in = -1
+                channel.tx_out = current_time
 
         # counters and protocol checks
-        for node in self.db:
-            if node.C_collision>=myglobal.N_collision:
-                self.switch_to_polling(node.id)
-                break
+        if self.mode=='polling':
+            for node in self.db:
+                if node.C_load == 0 or node.C_idle == 0:
+                    self.switch_to_competition(node.id)
+                    break
+        elif self.mode=='competition':
+            for node in self.db:
+                if node.C_collision>=myglobal.N_collision:
+                    self.switch_to_polling(node.id)
+                    break
+        else:
+            print('Error - cannot find rack mode in protocol check')
 
     def have_buffers_packets(self):
         for node in self.db:
@@ -296,9 +289,10 @@ class Node:
             self.current_packet_does_collide=False
             print('REtransmitting packet id=' + str(self.current_packet.packet_id) + ' from node=' + str(self.id))
 
-    def check_arrival(self,current_time):
+    def check_arrival_CD(self,current_time):
         if self.current_packet is not None:
-            if self.current_packet.time_trx_in<self.current_packet.time_trx_out and self.current_packet.time_trx_out<=current_time:
+            has_packet_arrived=self.current_packet.time_trx_in<self.current_packet.time_trx_out and self.current_packet.time_trx_out<=current_time
+            if has_packet_arrived:
                 if self.current_packet_does_collide:
                     self.C_collision = self.C_collision + 1
                     #print(str(self.C_collision))
@@ -306,10 +300,11 @@ class Node:
                     self.backoff_time=max(random.randint(0, (2 ** self.C_collision) - 1),1)* myglobal.timeslot
                     self.current_packet.time_trx_out=-1
                     self.current_packet.time_trx_in = -1
-                    print('Collision of packet =' + str(self.current_packet.packet_id) +' from node='+str(self.id) )
+                    print('Collision of packet at arrival =' + str(self.current_packet.packet_id) +' from node='+str(self.id) )
                 else:
                     self.C_collision=0
                     self.current_packet.time_trx_out=current_time
+                    self.current_packet.mode=self.flag_A
                     self.received.append(self.current_packet)
                     print('Received packet=' + str(self.current_packet.packet_id) + ' from node=' + str(self.current_packet.source_id))
                     self.current_packet = None

@@ -267,9 +267,9 @@ def run_with_params(): # main
 
 #############  params  ###############
 t_begin=0 #sec (float)
-t_end=0.1 #sec (float)
+t_end=1 #sec (float)
 avg_throughput=1e10 # mean bytes per sec being generated
-node_id_list=[1, 2, 3, 4, 5, 6, 7, 8] #source nodes
+node_id_list=[7, 8] #source nodes
 qos='all'# choose qos packets allowed {'low','med','high','all'}
 
 ############ constants ###############
