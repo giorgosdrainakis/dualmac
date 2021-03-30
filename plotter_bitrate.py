@@ -17,10 +17,11 @@ from dualmac.myglobal import *
 
 # Sampling params
 avgg=True
-filename= '/dualmac\\logs\\CD_0_1.csv'
+filename= 'logs\\CD_0_1_with_propdelay.csv'
 my_tbegin=0
 my_tend=0.1
 samples=500
+compare_bitare=1e10
 # Grouping params
 start_sampling_value=0
 end_sampling_value=8e5
@@ -39,7 +40,7 @@ class My_Group:
         self.ro_thru=[]
         self.ro_drop = []
         self.timestep=timestep
-        self.byterate1=1e10/8 #bytes per sec for ro=1, ro(x)=Byterate(1)/(Byterate(x)*ro(1))=byterate(x)/byterate(1)
+        self.byterate1=compare_bitare/8 #bytes per sec for ro=1, ro(x)=Byterate(1)/(Byterate(x)*ro(1))=byterate(x)/byterate(1)
 
     def calc_ro_drop(self):
         total=0
@@ -321,6 +322,8 @@ for gr in mygroup_list:
 print(str(prLOAD_BIT))
 print(str(prTHRU_BIT))
 print(str(prDROP_BIT))
+print(str(prDELAY))
+print(str(prDROPPROP))
 
 idx=0
 while idx<len(prDROP_BIT):
@@ -328,6 +331,8 @@ while idx<len(prDROP_BIT):
         del prLOAD_BIT[idx]
         del prTHRU_BIT[idx]
         del prDROP_BIT[idx]
+        del prDELAY[idx]
+        del prDROPPROP[idx]
     idx=idx+1
 
 idx=0
@@ -336,6 +341,8 @@ while idx<len(prDROP_BIT):
         del prLOAD_BIT[idx]
         del prTHRU_BIT[idx]
         del prDROP_BIT[idx]
+        del prDELAY[idx]
+        del prDROPPROP[idx]
     idx=idx+1
 
 idx=0
@@ -345,15 +352,21 @@ while idx<len(prDROP_BIT):
         del prLOAD_BIT[idx]
         del prTHRU_BIT[idx]
         del prDROP_BIT[idx]
+        del prDELAY[idx]
+        del prDROPPROP[idx]
     idx=idx+1
 
 del prLOAD_BIT[-1]
 del prTHRU_BIT[-1]
 del prDROP_BIT[-1]
+del prDELAY[-1]
+del prDROPPROP[-1]
 
-print(str(prLOAD_BIT))
-print(str(prTHRU_BIT))
-print(str(prDROP_BIT))
+print('LOAD='+str(prLOAD_BIT))
+print('THRU='+str(prTHRU_BIT))
+print('DROP='+str(prDROP_BIT))
+print('DELAY='+str(prDELAY))
+print('DROPPROP='+str(prDROPPROP))
 
 if avgg:
     #plt.plot(prLOAD,prTHRU, label = "thru")

@@ -1,8 +1,6 @@
 ROOT='C:\\Pycharm\\Projects\\polydiavlika\\dualmac\\'
 TRAFFIC_DATASETS_FOLDER='traffic_datasets\\'
-PROPAGATION_TIME=0 #PROPAGATION_TIME=0 10/(2e8)
-WAA_capacity_64=46
-WAA_packet_image_bits=9
+PROPAGATION_TIME=10/(2e8) #PROPAGATION_TIME=0 10/(2e8)
 TOLERANCE = 1e-9
 N_collision = 16
 T_send = 1e-4
