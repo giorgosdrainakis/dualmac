@@ -1,4 +1,6 @@
 import datetime
+import sys
+
 import pandas as pd
 from dualmac.node import *
 from dualmac.traffic import *
@@ -44,8 +46,9 @@ def main():
     # run simulation
     CURRENT_TIME=T_BEGIN
     print('start 0/1000=' + str(datetime.datetime.now()))
-    while CURRENT_TIME<=T_END: #or nodes.have_buffers_packets():
-        nodes.add_new_packets_to_buffers(CURRENT_TIME)
+    while CURRENT_TIME<=T_END or nodes.have_buffers_packets():
+        if CURRENT_TIME<=T_END:
+            nodes.add_new_packets_to_buffers(CURRENT_TIME)
         if MODE == 'DUAL':  # collision avoidance CA
             if CA:
                 nodes.check_transmission_CA(CURRENT_TIME)
@@ -75,14 +78,20 @@ def main():
                        'time_buffer_in,time_buffer_out,time_trx_in,time_trx_out,mode\n'
         print('id='+str(node.id))
         print('rx='+str(len(node.received)))
-        print('ovflow='+str(len(node.dropped)))
-        print('destroyed='+str(len(node.destroyed)))
+        print('drop='+str(len(node.dropped)))
+        print('buffered_high='+str(len(node.buffer_high.db)))
+        print('buffered_med='+str(len(node.buffer_med.db)))
+        print('buffered_low='+str(len(node.buffer_low.db)))
         print('---------')
         for packet in node.received:
             output_table=output_table+packet.show()+'\n'
         for packet in node.dropped:
             output_table=output_table+packet.show()+'\n'
-        for packet in node.destroyed:
+        for packet in node.buffer_high.db:
+            output_table=output_table+packet.show()+'\n'
+        for packet in node.buffer_med.db:
+            output_table=output_table+packet.show()+'\n'
+        for packet in node.buffer_low.db:
             output_table=output_table+packet.show()+'\n'
 
         print('Writing node +...'+str(node.id))
@@ -108,7 +117,6 @@ def main():
 
     print('completeness 1000/1000=' + str(datetime.datetime.now()))
 
-
 ### params and run
 MODE='DUAL' # or WAA
 CA=False #collision avoidance=True or detection=False
@@ -118,5 +126,5 @@ TOTAL_NODES =  8
 HIGH_BUFFER_SIZE = 1e6 # bytes
 MED_BUFFER_SIZE = 1e6 # bytes
 LOW_BUFFER_SIZE = 1e6 # bytes
-traffic_dataset_folder='2021_03_09_14_30_35_864499//'
+traffic_dataset_folder='0.2sec//'
 main() # will create N logfiles for N nodes and a combined csv with all packets in root/logs

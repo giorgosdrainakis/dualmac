@@ -44,27 +44,6 @@ class Nodes:
         else:
             print('Error - cannot find rack mode')
 
-    def calculate_process_table_WAA(self,current_time):
-        pass
-
-    def calculate_buffer_image_WAA(self,current_time):
-        total_control_message=[]
-        for node in self.db:
-            msg=get_message_WAA()
-
-    def transmit_WAA(self, current_time):
-        if self.check_new_cycle_WAA(current_time):
-            self.calculate_process_table_WAA(current_time)
-        for node in self.db:
-            node.transmit_WAA(current_time, detected_free_channels)
-            node.transmit_control() # ensomatomeno me to panw todo
-
-    def check_transmission_WAA(self,current_time):
-        # check conflicts due to instanteous transmission
-        # check arrivals
-        for node in self.db:
-            node.check_arrival_WAA(current_time)
-
     def check_transmission_CA(self,current_time):
         # check conflicts due to instanteous transmission
         last_collided_channel_ids=[]
@@ -248,17 +227,6 @@ class Node:
         if self.buffer_low.has_packets() or self.buffer_med.has_packets() or self.buffer_high.has_packets():
             return True
 
-    def get_message_WAA(self):
-        for counter in range(0,myglobal.WAA_capacity_64):
-            newline=self.buffer_high.encode_packet_WAA(counter)
-
-        for counter in range(0,myglobal.WAA_capacity_64):
-            newline=self.buffer_med.encode_packet_WAA(counter)
-
-        for counter in range(0,myglobal.WAA_capacity_64):
-            newline=self.buffer_low.encode_packet_WAA(counter)
-
-
     def transmit(self,current_time,detected_free_channels):
         if self.waiting>0:
             return -11
@@ -349,32 +317,34 @@ class Node:
                     pass
                     #print('TRXing/Waiting packet=' + str(self.current_packet.packet_id) + ' from node=' + str(self.current_packet.source_id))
 
-    def check_arrival_WAA(self,current_time):
-        for pack in self.packets_WAA:
-            has_packet_arrived=pack.time_trx_in<pack.time_trx_out and pack.time_trx_out<=current_time
-            if has_packet_arrived:
-                pack.time_trx_out=current_time
-                self.received.append(pack)
-                self.packets_WAA.remove(pack)
-                print('Received packet=' + str(pack.packet_id) + ' from node=' + str(pack.source_id))
-            else: #packet has not arrived
-                pass
-
     def add_new_packets_to_buffers(self,current_time):
         new_packets=self.traffic.get_new_packets(current_time)
         for packet in new_packets:
             is_in_buffer=False
             if packet.packet_qos=='low':
                 is_in_buffer=self.buffer_low.add(packet,current_time)
-                #('Added packet=' + str(packet.packet_id) + ' in low buffer node=' + str(self.id))
+                if len(self.buffer_low.db)>2:
+                    print('Trying packet=' + str(packet.packet_id) + ' in  low buffer node=' + str(self.id) + ',with packs='+str(self.buffer_low.db[0].packet_id)+','+str(self.buffer_low.db[-1].packet_id))
+                else:
+                    print('Trying packet=' + str(packet.packet_id) + ' in  low buffer node=' + str(self.id))
+                if not is_in_buffer:
+                    print('Dropped packet=' + str(packet.packet_id) + ' in node=' + str(self.id))
+                else:
+                    print('Added packet=' + str(packet.packet_id) + ' in node=' + str(self.id))
             elif packet.packet_qos=='med':
                 is_in_buffer=self.buffer_med.add(packet,current_time)
-                #print('Added packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id))
+                if len(self.buffer_med.db)>2:
+                    print('Trying packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id)+ ',with packs='+str(self.buffer_med.db[0].packet_id)+','+str(self.buffer_med.db[-1].packet_id))
+                else:
+                    print('Trying packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id))
+                if not is_in_buffer:
+                    print('Dropped packet=' + str(packet.packet_id) + ' in node=' + str(self.id))
+                else:
+                    print('Added packet=' + str(packet.packet_id) + ' in node=' + str(self.id))
             elif packet.packet_qos=='high':
                 is_in_buffer=self.buffer_high.add(packet,current_time)
-                #print('Added packet=' + str(packet.packet_id) + ' in high buffer node=' + str(self.id))
             if not is_in_buffer:
-                print('Dropped packet='+str(packet.packet_id)+' in node='+str(self.id))
+                #print('Dropped packet='+str(packet.packet_id)+' in node='+str(self.id))
                 packet.mode=self.flag_A
                 self.dropped.append(packet)
 
@@ -385,24 +355,22 @@ class Node:
         return False
 
     def get_next_packet(self,current_time):
-        if self.backoff_time==0:
-            if self.buffer_high.has_packets():
-                return self.buffer_high.get_next_packet()
-            elif self.buffer_med.has_packets():
-                if self.buffer_low.has_packets():
-                    lucky=random.uniform(0, 1)
-                    if lucky<0.3:
-                        self.buffer_low.get_next_packet()
-                    else:
-                        self.buffer_med.get_next_packet()
+        if self.buffer_high.has_packets():
+            return self.buffer_high.get_next_packet()
+        elif self.buffer_med.has_packets():
+            if self.buffer_low.has_packets():
+                lucky=random.uniform(0, 1)
+                if lucky<0.3:
+                    return self.buffer_low.get_next_packet()
                 else:
                     return self.buffer_med.get_next_packet()
-            elif self.buffer_low.has_packets():
-                return self.buffer_low.get_next_packet()
             else:
-                return None
+                return self.buffer_med.get_next_packet()
+        elif self.buffer_low.has_packets():
+            return self.buffer_low.get_next_packet()
         else:
             return None
+
 
 
 

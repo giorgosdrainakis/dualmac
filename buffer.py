@@ -39,16 +39,6 @@ class Buffer():
                 self.db.remove(element)
                 break
 
-    def encode_packet_WAA(self,pos):
-        mystr = []
-        if len(self.db)>pos:
-            current_packet=self.db[pos]
-            #todo
-        else:
-            for i in range(0,myglobal.WAA_packet_image_bits):
-                mystr.append(-1)
-            return mystr
-
     def get_current_size(self):
         mysize=0
         for element in self.db:
