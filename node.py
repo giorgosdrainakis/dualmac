@@ -332,6 +332,7 @@ class Node:
                 else:
                     print('Added packet=' + str(packet.packet_id) + ' in node=' + str(self.id))
             elif packet.packet_qos=='med':
+                print('Trying packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id) +' with bufsize='+str(self.buffer_med.get_current_size()))
                 is_in_buffer=self.buffer_med.add(packet,current_time)
                 if len(self.buffer_med.db)>2:
                     print('Trying packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id)+ ',with packs='+str(self.buffer_med.db[0].packet_id)+','+str(self.buffer_med.db[-1].packet_id))
@@ -341,6 +342,7 @@ class Node:
                     print('Dropped packet=' + str(packet.packet_id) + ' in node=' + str(self.id))
                 else:
                     print('Added packet=' + str(packet.packet_id) + ' in node=' + str(self.id))
+                print('Added packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id))
             elif packet.packet_qos=='high':
                 is_in_buffer=self.buffer_high.add(packet,current_time)
             if not is_in_buffer:
