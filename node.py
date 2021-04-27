@@ -368,8 +368,9 @@ class Node:
                 is_in_buffer=self.buffer_low.add(packet,current_time)
                 #('Added packet=' + str(packet.packet_id) + ' in low buffer node=' + str(self.id))
             elif packet.packet_qos=='med':
+                print('Trying packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id) +' with bufsize='+str(self.buffer_med.get_current_size()))
                 is_in_buffer=self.buffer_med.add(packet,current_time)
-                #print('Added packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id))
+                print('Added packet=' + str(packet.packet_id) + ' in  med buffer node=' + str(self.id))
             elif packet.packet_qos=='high':
                 is_in_buffer=self.buffer_high.add(packet,current_time)
                 #print('Added packet=' + str(packet.packet_id) + ' in high buffer node=' + str(self.id))

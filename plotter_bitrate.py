@@ -16,15 +16,15 @@ from dualmac.myglobal import *
 # Plot label params at the end of the script (thruput-delay-overflow)
 
 # Sampling params
-avgg=True
-filename= 'logs\\CD_0_1_with_propdelay.csv'
+avgg=False
+filename= 'logs\\dual02sec.csv'
 my_tbegin=0
-my_tend=0.1
-samples=500
+my_tend=0.2
+samples=5000
 compare_bitare=1e10
 # Grouping params
 start_sampling_value=0
-end_sampling_value=8e5
+end_sampling_value=1.6e6
 grouping_points=18
 rates=np.linspace(start_sampling_value,end_sampling_value,grouping_points)
 
@@ -35,6 +35,7 @@ class My_Group:
         self.thru=[]
         self.drop=[]
         self.delay=[]
+        self.end_delay=[]
         self.dropprop=[]
         self.ro=[]
         self.ro_thru=[]
@@ -132,6 +133,17 @@ class My_Group:
         else:
             return 0
 
+    def calc_end_delay(self):
+        total=0
+        N=0
+        for i in self.end_delay:
+            total=total+i
+            N=N+1
+        if N>0:
+            return total/N
+        else:
+            return 0
+
     def calc_thru(self):
         total=0
         N=0
@@ -208,6 +220,8 @@ class My_Timeslot():
         self.dropped=0
         self.thru=0
         self.thrud=0
+        self.end_delay=0
+        self.end_delayed=0
 
 def find_closest(element,list_of_things):
     diff=math.inf
@@ -230,7 +244,6 @@ with open(filename) as csv_file:
         db.append(new_rec)
 
 tbegin_range=np.linspace(my_tbegin, my_tend, samples)
-list_of_new_dbs=[]
 total_load=0
 total_time=my_tend-my_tbegin
 timestep=total_time/samples
@@ -257,20 +270,24 @@ for rec in db:
             timeslot.thrud = timeslot.thrud + 1
             timeslot.delay=timeslot.delay+(rec.time_trx_out-rec.time)
             timeslot.delayed=timeslot.delayed+1
+            timeslot.end_delay=timeslot.end_delay+(rec.time_trx_in-rec.time)
+            timeslot.end_delayed=timeslot.end_delayed+1
 LOAD=[]
 THRU=[]
 DROP=[]
 DELAY=[]
 THRU_BIT=[]
 LOAD_BIT=[]
+END_DELAY=[]
 
 for timeslot in timeslot_list:
     LOAD.append(timeslot.load)
     THRU.append(timeslot.thru)
     DROP.append(timeslot.drop)
-    DELAY.append(timeslot.delay/timeslot.delayed)
+    DELAY.append(timeslot.delay)
     THRU_BIT.append(timeslot.thru*8)
     LOAD_BIT.append(timeslot.load*8)
+    END_DELAY.append(timeslot.end_delay)
 
 #Group stage
 mygroup_list=[]
@@ -295,6 +312,8 @@ for idx in range(0,len(LOAD)):
             else:
                 gr.dropprop.append(DROP[idx]/LOAD[idx])
             break
+        if not found:
+            print('Didnt find this rate='+str(gr.load_rate))
 
 prLOAD=[]
 prTHRU=[]
@@ -307,11 +326,13 @@ prRO_DROP=[]
 prLOAD_BIT=[]
 prTHRU_BIT=[]
 prDROP_BIT=[]
+prEND_DELAY=[]
 for gr in mygroup_list:
     prLOAD.append(gr.calc_avgload())
     prTHRU.append(gr.calc_thru())
     prDROP.append(gr.calc_drop())
     prDELAY.append(gr.calc_delay())
+    prEND_DELAY.append(gr.calc_end_delay())
     prDROPPROP.append(gr.calc_dropprop())
     prRO.append(gr.calc_ro())
     prRO_THRU.append(gr.calc_ro_thru())
@@ -332,6 +353,7 @@ while idx<len(prDROP_BIT):
         del prTHRU_BIT[idx]
         del prDROP_BIT[idx]
         del prDELAY[idx]
+        del prEND_DELAY[idx]
         del prDROPPROP[idx]
     idx=idx+1
 
@@ -342,6 +364,7 @@ while idx<len(prDROP_BIT):
         del prTHRU_BIT[idx]
         del prDROP_BIT[idx]
         del prDELAY[idx]
+        del prEND_DELAY[idx]
         del prDROPPROP[idx]
     idx=idx+1
 
@@ -353,6 +376,7 @@ while idx<len(prDROP_BIT):
         del prTHRU_BIT[idx]
         del prDROP_BIT[idx]
         del prDELAY[idx]
+        del prEND_DELAY[idx]
         del prDROPPROP[idx]
     idx=idx+1
 
@@ -361,11 +385,13 @@ del prTHRU_BIT[-1]
 del prDROP_BIT[-1]
 del prDELAY[-1]
 del prDROPPROP[-1]
+del prEND_DELAY[-1]
 
 print('LOAD='+str(prLOAD_BIT))
 print('THRU='+str(prTHRU_BIT))
 print('DROP='+str(prDROP_BIT))
 print('DELAY='+str(prDELAY))
+print('END_DELAY='+str(prEND_DELAY))
 print('DROPPROP='+str(prDROPPROP))
 
 if avgg:
