@@ -15,15 +15,15 @@ from dualmac.myglobal import *
 # Plot label params at the end of the script (thruput-delay-overflow)
 
 # Sampling params
-avgg=True
-filename= 'logs\\dual02sec.csv'
+avgg=False
+filename= 'logs\\4nodes\\combined2022_03_14_12_54_26_649460.csv'
 my_tbegin=0
 my_tend=0.2
-my_samples=1000
+my_samples=100
 # Grouping params
 start_group_value=0
-end_group_value=7.5e5
-grouping_points=40
+end_group_value=4e5
+grouping_points=25
 
 class Record():
     def __init__(self,packet_id,time,size,qos,source_id,

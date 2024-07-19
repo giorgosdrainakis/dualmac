@@ -9,3 +9,4 @@ T_idle = (2.56)*(1e-8)+PROPAGATION_TIME
 timestep = (0.8)*(1e-9) #timestep = 0.8e-9
 WAITING=timestep
 timeslot=(10)*(1e-9) #timeslot=(51.2)*(1e-9)
+INTRA_REMOVE_INTER=True

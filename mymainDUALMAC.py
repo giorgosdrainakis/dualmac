@@ -122,9 +122,9 @@ MODE='DUAL' # or WAA
 CA=False #collision avoidance=True or detection=False
 T_BEGIN = 0
 T_END = 0.2
-TOTAL_NODES =  8
+TOTAL_NODES = 12
 HIGH_BUFFER_SIZE = 1e6 # bytes
 MED_BUFFER_SIZE = 1e6 # bytes
 LOW_BUFFER_SIZE = 1e6 # bytes
-traffic_dataset_folder='0.2sec//'
+traffic_dataset_folder='0.2sec_m12//'
 main() # will create N logfiles for N nodes and a combined csv with all packets in root/logs
