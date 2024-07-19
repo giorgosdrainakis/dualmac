@@ -121,10 +121,10 @@ def main():
 MODE='DUAL' # or WAA
 CA=False #collision avoidance=True or detection=False
 T_BEGIN = 0
-T_END = 0.2
-TOTAL_NODES = 12
+T_END = 0.100
+TOTAL_NODES = 16
 HIGH_BUFFER_SIZE = 1e6 # bytes
 MED_BUFFER_SIZE = 1e6 # bytes
 LOW_BUFFER_SIZE = 1e6 # bytes
-traffic_dataset_folder='0.2sec_m12//'
+traffic_dataset_folder='20240719_id99_topo1x16_ch1x10_load15g_end100ms_dcTF\\'
 main() # will create N logfiles for N nodes and a combined csv with all packets in root/logs
